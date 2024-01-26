@@ -1,5 +1,5 @@
 [package]
-name = "falling_sand"
+name = "snake_cli_bouncer"
 version = "0.1.0"
 edition = "2021"
 

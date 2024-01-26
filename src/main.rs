@@ -2,7 +2,7 @@ use std::collections::LinkedList;
 use std::fmt::{Display, Formatter};
 use std::thread::sleep;
 use std::time::Duration;
-use termion::terminal_size;
+use term_size;
 
 const UPDATE_MS: Duration = Duration::from_millis(100);
 const EMPTY: &str = "-";
@@ -16,7 +16,8 @@ fn main()
     let size_rows: u8;
 
     if use_temrinal_size {
-        let terminal_size = terminal_size().expect("cannot get terinal size");
+        // let terminal_size = terminal_size().expect("cannot get terinal size");
+        let terminal_size = term_size::dimensions().expect("cannot get terinal size");
         size_columns = terminal_size.0 as u8 / 2;
         size_rows = terminal_size.1 as u8 - 1;
     } else {

@@ -1,11 +1,12 @@
 use std::collections::LinkedList;
 use std::fmt::{Display, Formatter};
 use std::thread::sleep;
-use crate::consts::{BULLET, BULLET_HIT, EMPTY, FOOD, UPDATE_MS};
 use rand::Rng;
+use crate::configer::Config;
 
 pub struct Land<'a>
 {
+    config: &'a Config,
     vector: Vec<Vec<&'a str>>,
     columns: u8,
     rows: u8,
@@ -16,10 +17,11 @@ pub struct Land<'a>
 }
 
 impl Land<'_> {
-    pub fn new(columns: u8, rows: u8) -> Land<'static>
+    pub fn new(config: &Config, columns: u8, rows: u8) -> Land
     {
         Land {
-            vector: vec![vec![EMPTY; rows as usize]; columns as usize],
+            config,
+            vector: vec![vec![&config.empty; rows as usize]; columns as usize],
             columns,
             rows,
             bullet_position: (0, 0),
@@ -51,7 +53,7 @@ impl Land<'_> {
     fn remove_last_tail_block(&mut self)
     {
         let block = self.snake.pop_back().unwrap();
-        self.vector[block.0][block.1] = EMPTY;
+        self.vector[block.0][block.1] = &self.config.empty;
     }
 
     pub fn add_food(&mut self)
@@ -69,7 +71,7 @@ impl Land<'_> {
 
             for _ in 0..row_rand {
                 let pos_rand = rand_thread.gen_range(0..self.rows);
-                col[pos_rand as usize] = FOOD;
+                col[pos_rand as usize] = &self.config.food;
             }
         }
     }
@@ -86,14 +88,15 @@ impl Land<'_> {
 
             let next_value = self.test(self.bullet_position.0, self.bullet_position.1);
 
-            if next_value == BULLET {
+            if next_value == &self.config.empty {
                 // acknowledge snake crossed itself
-                self.vector[self.bullet_position.0][self.bullet_position.1] = BULLET_HIT;
-            } else if next_value == FOOD {
+                self.vector[self.bullet_position.0][self.bullet_position.1] = &self.config.bullet;
+            } else if next_value == &self.config.food {
                 // if eaten, prolong the tail
-                self.tail_len += 1
+                self.vector[self.bullet_position.0][self.bullet_position.1] = &self.config.bullet;
+                self.tail_len += 1;
             } else {
-                self.vector[self.bullet_position.0][self.bullet_position.1] = BULLET;
+                self.vector[self.bullet_position.0][self.bullet_position.1] = &self.config.bullet_hit;
             }
 
             self.snake.push_front(self.bullet_position);
@@ -107,7 +110,7 @@ impl Land<'_> {
             print!("\x1b[{}A", self.rows);
             print!("\x1b[?25h");
 
-            sleep(UPDATE_MS);
+            sleep(self.config.update_ms);
         }
     }
 }

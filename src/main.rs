@@ -1,9 +1,16 @@
+use crate::configer::Config;
+
 mod utils;
 mod land;
-mod consts;
+mod configer;
 
 fn main()
 {
+    #[cfg(windows)]
+    ansi_term::enable_ansi_support().unwrap();
+
+    let config: Config = Config::new();
+
     let use_terminal_size: bool = false;
     let size_columns: u8;
     let size_rows: u8;
@@ -14,7 +21,7 @@ fn main()
         (size_columns, size_rows) = (60, 14);
     }
 
-    let mut land = land::Land::new(size_columns, size_rows);
+    let mut land = land::Land::new(&config, size_columns, size_rows);
     land.add_food();
     land.run();
 }

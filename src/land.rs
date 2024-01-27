@@ -1,6 +1,7 @@
 use std::collections::LinkedList;
 use std::fmt::{Display, Formatter};
 use std::thread::sleep;
+use colored::Colorize;
 use rand::Rng;
 use crate::configer::Config;
 
@@ -53,7 +54,16 @@ impl Land<'_> {
     fn remove_last_tail_block(&mut self)
     {
         let block = self.snake.pop_back().unwrap();
-        self.vector[block.0][block.1] = &self.config.empty;
+
+        let is_tail = self.snake
+            .iter()
+            .any(|&(x, y)| (x, y) == (block.0, block.1));
+
+        if is_tail {
+            self.vector[block.0][block.1] = &self.config.bullet;
+        } else {
+            self.vector[block.0][block.1] = &self.config.empty;
+        }
     }
 
     pub fn add_food(&mut self)
@@ -107,7 +117,7 @@ impl Land<'_> {
                 self.remove_last_tail_block();
             }
 
-            print!("\x1b[{}A", self.rows);
+            print!("\x1b[{}A", self.rows + 2);
             print!("\x1b[?25h");
 
             sleep(self.config.update_ms);
@@ -119,13 +129,31 @@ impl Display for Land<'_>
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result
     {
+        let top_line = format!(
+            "\u{250F}{}\u{2513}\n", "\u{2501}".repeat(self.columns as usize * 2 + 1)
+        );
+        let bottom_line = format!(
+            "\u{2517}{}\u{251B}\n", "\u{2501}".repeat(self.columns as usize * 2 + 1)
+        );
+        let side_line = "\u{2503}";
+
+        write!(f, "{}", top_line.yellow())?;
+
         for row in 0..self.rows
         {
             for col in 0..self.columns {
-                write!(f, "{} ", &self.vector[col as usize][row as usize])?
+                if col == 0  { write!(f, "{} ", side_line.yellow())? }
+
+                write!(f, "{} ", &self.vector[col as usize][row as usize])?;
+
+                if col == self.columns - 1 { write!(f, "{}", side_line.yellow())? }
             }
             write!(f, "\n")?
         }
+
+
+        // write!(f, "\u{2517}{}\u{251B}\n", "\u{2501}".repeat(self.columns as usize * 2 + 1))?;
+        write!(f, "{}", bottom_line.yellow())?;
 
         Ok(())
     }

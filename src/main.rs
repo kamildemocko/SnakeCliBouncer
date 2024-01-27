@@ -11,9 +11,10 @@ fn main()
     if use_terminal_size {
         (size_columns, size_rows) = utils::get_terminal_size()
     } else {
-        (size_columns, size_rows) = (25, 14);
+        (size_columns, size_rows) = (60, 14);
     }
 
     let mut land = land::Land::new(size_columns, size_rows);
+    land.add_food();
     land.run();
 }

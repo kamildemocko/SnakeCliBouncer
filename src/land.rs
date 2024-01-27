@@ -1,19 +1,23 @@
 use std::collections::LinkedList;
 use std::fmt::{Display, Formatter};
 use std::thread::sleep;
-use crate::consts::{BULLET, EMPTY, TAIL_LEN, UPDATE_MS};
+use crate::consts::{BULLET, BULLET_HIT, EMPTY, FOOD, UPDATE_MS};
+use rand::Rng;
 
-pub struct Land<'a> {
+pub struct Land<'a>
+{
     vector: Vec<Vec<&'a str>>,
     columns: u8,
     rows: u8,
     bullet_position: (usize, usize),
     bullet_direction: (u8, u8),
     snake:LinkedList<(usize, usize)>,
+    tail_len: u8,
 }
 
 impl Land<'_> {
-    pub fn new(columns: u8, rows: u8) -> Land<'static> {
+    pub fn new(columns: u8, rows: u8) -> Land<'static>
+    {
         Land {
             vector: vec![vec![EMPTY; rows as usize]; columns as usize],
             columns,
@@ -21,10 +25,12 @@ impl Land<'_> {
             bullet_position: (0, 0),
             bullet_direction: (1, 1),
             snake: LinkedList::new(),
+            tail_len: 3,
         }
     }
 
-    fn update_positional_variables(&mut self) {
+    fn update_positional_variables(&mut self)
+    {
         if self.bullet_position.0 >= self.columns as usize - 1 { self.bullet_direction.0 = 0 }
         if self.bullet_position.0 <= 0 { self.bullet_direction.0 = 1 }
 
@@ -42,9 +48,34 @@ impl Land<'_> {
         }
     }
 
-    fn remove_last_tail_block(&mut self) {
+    fn remove_last_tail_block(&mut self)
+    {
         let block = self.snake.pop_back().unwrap();
         self.vector[block.0][block.1] = EMPTY;
+    }
+
+    pub fn add_food(&mut self)
+    {
+        let max_per_row = match self.columns {
+            0..=9 => 2,
+            10..=15 => 3,
+            _ => 4,
+        };
+        let mut rand_thread = rand::thread_rng();
+
+        for col in &mut self.vector {
+            let row_rand = rand_thread.gen_range(0..=max_per_row);
+            if row_rand == 0 { continue; }
+
+            for _ in 0..row_rand {
+                let pos_rand = rand_thread.gen_range(0..self.rows);
+                col[pos_rand as usize] = FOOD;
+            }
+        }
+    }
+
+    fn test(&self, col: usize, row: usize) -> &str {
+        self.vector[col][row]
     }
 
     pub fn run(&mut self)
@@ -53,14 +84,25 @@ impl Land<'_> {
             print!("\r");
             print!("{}", self);
 
-            self.vector[self.bullet_position.0][self.bullet_position.1] = BULLET;
+            let next_value = self.test(self.bullet_position.0, self.bullet_position.1);
 
-            self.snake.push_front(self.bullet_position);
-            if self.snake.len() as u8 > TAIL_LEN {
-                self.remove_last_tail_block();
+            if next_value == BULLET {
+                // acknowledge snake crossed itself
+                self.vector[self.bullet_position.0][self.bullet_position.1] = BULLET_HIT;
+            } else if next_value == FOOD {
+                // if eaten, prolong the tail
+                self.tail_len += 1
+            } else {
+                self.vector[self.bullet_position.0][self.bullet_position.1] = BULLET;
             }
 
+            self.snake.push_front(self.bullet_position);
             self.update_positional_variables();
+
+            // keep snake short or not if eaten
+            if self.snake.len() as u8 > self.tail_len {
+                self.remove_last_tail_block();
+            }
 
             print!("\x1b[{}A", self.rows);
             print!("\x1b[?25h");
@@ -70,7 +112,8 @@ impl Land<'_> {
     }
 }
 
-impl Display for Land<'_> {
+impl Display for Land<'_>
+{
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result
     {
         for row in 0..self.rows

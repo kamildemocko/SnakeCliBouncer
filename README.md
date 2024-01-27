@@ -12,3 +12,15 @@ When the snake crosses its tail, this is detected and different ascii character 
 And colors.
 
 And ... CLI arguments
+
+## Symbols
+✖ snake body
+
+∅ food
+
+∌ body cross
+
+- empty space 
+
+## Screenshot
+![image](https://github.com/kamildemocko/SnakeCliBouncer/assets/50048116/c3492931-6e6e-4adf-9733-87a5df0130bd)

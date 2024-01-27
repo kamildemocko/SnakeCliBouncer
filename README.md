@@ -14,13 +14,13 @@ And colors.
 And ... CLI arguments
 
 ## Symbols
-✖ snake body
+✖ snake body (yellow)
 
-∅ food
+∅ food (green)
 
-∌ body cross
+∌ body crossing symbol (red)
 
-- empty space 
+\- empty space (gray)
 
 ## Screenshot
 ![image](https://github.com/kamildemocko/SnakeCliBouncer/assets/50048116/c3492931-6e6e-4adf-9733-87a5df0130bd)

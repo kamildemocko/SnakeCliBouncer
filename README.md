@@ -9,4 +9,6 @@ I added randomness with food, the tail of snake grows as it eats it.
 
 When the snake crosses its tail, this is detected and different ascii character is shown.
 
-And ... colors.
+And colors.
+
+And ... CLI arguments

@@ -16,9 +16,9 @@ fn main()
     let size_rows: u8;
 
     if use_terminal_size {
-        (size_columns, size_rows) = utils::get_terminal_size()
+        (size_columns, size_rows) = utils::get_terminal_size();
     } else {
-        (size_columns, size_rows) = (60, 14);
+        (size_columns, size_rows) = (58, 14);
     }
 
     let mut land = land::Land::new(&config, size_columns, size_rows);
